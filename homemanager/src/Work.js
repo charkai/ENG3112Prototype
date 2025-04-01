@@ -2,23 +2,28 @@
 import HeartRateGraph from './shared-components/HeartRateGraph';
 import SettingCard from './shared-components/SettingCard';
 import HomeButton from './shared-components/HomeButton';
+import BrightnessSlider from './shared-components/BrightnessSlider';
+
 const Work = () => {
 
     const settings = [
         {
             "name": "Lighting", 
             "emoji": "💡",
-            "description": "Ensure the lighting will maximise your productivity"
+            "description": "Ensure the lighting will maximise your productivity",
+            "children": <BrightnessSlider />
         },
         {
             "name": "Temperature", 
             "emoji": "🌡️",
-            "description": "Adjust the temperature to your liking"
+            "description": "Adjust the temperature to your liking",
+            "children": <BrightnessSlider />
         },
         {
             "name": "Noise", 
             "emoji": "🔊",
-            "description": "Let's make sure that noise is within acceptable levels"
+            "description": "Let's make sure that noise is within acceptable levels",
+            "children": <BrightnessSlider />
         }
     ]
 
@@ -34,6 +39,7 @@ const Work = () => {
                     emoji={setting.emoji}
                     name={setting.name}
                     description={setting.description}
+                    children={setting.children}
                 />
             ))}
             </div>
