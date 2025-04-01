@@ -1,8 +1,9 @@
 import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const HeartRateGraph = ({hrvValue}) => {
     const [value, setValue] = useState(0);
+    const currentValueRef = useRef(0);
 
     useEffect(() => {
         // Only animate if hrvValue is a valid number
@@ -10,8 +11,8 @@ const HeartRateGraph = ({hrvValue}) => {
             return;
         }
 
-        // Start from 0 and animate to the target value
-        const startValue = 0;
+        // Start from current value and animate to the target value
+        const startValue = currentValueRef.current;
         const targetValue = hrvValue;
         const duration = 1000; // 1 second animation
         const steps = 60; // 60 steps for smooth animation
@@ -23,8 +24,10 @@ const HeartRateGraph = ({hrvValue}) => {
             currentStep++;
             setValue(prevValue => {
                 const newValue = prevValue + valueIncrement;
+                currentValueRef.current = newValue;
                 if (currentStep >= steps) {
                     clearInterval(interval);
+                    currentValueRef.current = targetValue;
                     return targetValue;
                 }
                 return newValue;
