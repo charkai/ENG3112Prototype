@@ -10,8 +10,8 @@ const HeartRateGraph = ({hrvValue}) => {
             return;
         }
 
-        // Start from current value and animate to the target value
-        const startValue = value;
+        // Start from 0 and animate to the target value
+        const startValue = 0;
         const targetValue = hrvValue;
         const duration = 1000; // 1 second animation
         const steps = 60; // 60 steps for smooth animation

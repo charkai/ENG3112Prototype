@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 
 const Work = () => {
     const [hrvValue, setHrvValue] = useState(0);
+    const [luminosity, setLuminosity] = useState(0);
 
     useEffect(() => {
         const fetchHRV = async () => {
@@ -19,13 +20,31 @@ const Work = () => {
             }
         };
 
-        fetchHRV();
+        const fetchLuminosity = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/luminosity');
+                const data = await response.json();
+                setLuminosity(data.luminosity);
+            } catch (error) {
+                console.error('Error fetching luminosity:', error);
+            }
+        };
 
-        // Set up interval to fetch every 5 seconds
-        const interval = setInterval(fetchHRV, 5000);
+        fetchHRV();
+        fetchLuminosity();
+
+
+        // Interval fetches HRV every 5 seconds
+        const hrvInterval = setInterval(fetchHRV, 5000);
+
+        // Interval fetches luminosity every 20 seconds
+        const luminosityInterval = setInterval(fetchLuminosity, 20000);
 
         // Cleanup interval on unmount
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(hrvInterval);
+            clearInterval(luminosityInterval);
+        };
     }, []);
 
     const settings = [
@@ -33,19 +52,19 @@ const Work = () => {
             "name": "Lighting", 
             "emoji": "💡",
             "description": "Ensure the lighting will maximise your productivity",
-            "children": <BrightnessSlider />
+            "children": <BrightnessSlider luminosity={luminosity} onLuminosityChange={setLuminosity} />
         },
         {
             "name": "Temperature", 
             "emoji": "🌡️",
             "description": "Adjust the temperature to your liking",
-            "children": <BrightnessSlider />
+            
         },
         {
             "name": "Noise", 
             "emoji": "🔊",
             "description": "Let's make sure that noise is within acceptable levels",
-            "children": <BrightnessSlider />
+            
         }
     ]
 
