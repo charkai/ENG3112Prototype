@@ -1,4 +1,6 @@
 import SettingCard from "./shared-components/SettingCard";
+import HomeButton from "./shared-components/HomeButton";
+
 const Personal = () => {
 
     const settings = [
@@ -20,7 +22,10 @@ const Personal = () => {
     ]
     return (
         <div className="flex flex-col h-screen p-10">
-            <h1 className="text-left text-6xl font-medium text-gray-800 dark:text-gray-100">Welcome to Personal Mode</h1>
+            <div className="flex flex-row items-center justify-between p-4">
+                <h1 className="text-left text-6xl font-medium text-gray-800 dark:text-gray-100">Welcome to Personal Mode</h1>
+                <HomeButton />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
             {settings.map((setting) => (
                 <SettingCard 
