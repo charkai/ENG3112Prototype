@@ -3,7 +3,7 @@ To run backend
 
 ```
 cd homemanagerserver
-node server.js OR npm run dev
+node server.js OR npm run server
 ```
 To run frontend 
 

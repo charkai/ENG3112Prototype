@@ -3,8 +3,30 @@ import HeartRateGraph from './shared-components/HeartRateGraph';
 import SettingCard from './shared-components/SettingCard';
 import HomeButton from './shared-components/HomeButton';
 import BrightnessSlider from './shared-components/BrightnessSlider';
+import { useState, useEffect } from 'react';
 
 const Work = () => {
+    const [hrvValue, setHrvValue] = useState(0);
+
+    useEffect(() => {
+        const fetchHRV = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/api/hrv');
+                const data = await response.json();
+                setHrvValue(data.hrv);
+            } catch (error) {
+                console.error('Error fetching HRV:', error);
+            }
+        };
+
+        fetchHRV();
+
+        // Set up interval to fetch every 5 seconds
+        const interval = setInterval(fetchHRV, 5000);
+
+        // Cleanup interval on unmount
+        return () => clearInterval(interval);
+    }, []);
 
     const settings = [
         {
@@ -44,7 +66,7 @@ const Work = () => {
             ))}
             </div>
             <div className="p-4">
-                <HeartRateGraph />
+                <HeartRateGraph hrvValue={hrvValue} />
             </div>
         </div>
     )
