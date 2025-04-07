@@ -4,7 +4,7 @@ const { ReadlineParser } = require("@serialport/parser-readline");
 let pulses = [];
 let luminosity = 0;
 
-const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB0";
+const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB4";
 let serialPort;
 
 /**
