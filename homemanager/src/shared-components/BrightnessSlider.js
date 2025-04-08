@@ -1,5 +1,5 @@
 import Slider from '@mui/material/Slider';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function valuetext(value) {
     return `${value} lumens`;
@@ -7,6 +7,10 @@ function valuetext(value) {
 
 const BrightnessSlider = ({ luminosity, onLuminosityChange }) => {
     const [localValue, setLocalValue] = useState(luminosity);
+
+    useEffect(() => {
+        setLocalValue(luminosity);
+    }, [luminosity]);
 
     const handleChange = async (event, newValue) => {
         setLocalValue(newValue);
@@ -35,6 +39,7 @@ const BrightnessSlider = ({ luminosity, onLuminosityChange }) => {
         }
     };
 
+
     return (
         <Slider
             aria-label="Temperature"
@@ -47,6 +52,18 @@ const BrightnessSlider = ({ luminosity, onLuminosityChange }) => {
             marks
             min={0}
             max={255}
+            sx={{
+                color: '#7e22ce',
+                '& .MuiSlider-thumb': {
+                  backgroundColor: '#7e22ce',
+                },
+                '& .MuiSlider-track': {
+                  backgroundColor: '#7e22ce',
+                },
+                '& .MuiSlider-rail': {
+                  backgroundColor: '#d1c4e9', 
+                },
+             }}
         />
     )
 }
