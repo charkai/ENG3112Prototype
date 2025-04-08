@@ -79,6 +79,7 @@ const Work = () => {
     const handleAcceptChanges = async() => {
         handleClosePopup();
         try {
+            setLuminosity(100);
             const response = await fetch('http://localhost:3001/api/luminosity', {
                 method: 'POST',
                 headers: {
@@ -92,7 +93,7 @@ const Work = () => {
             }
             const data = await response.json();
             console.log('Success:', data);
-            setLuminosity(100)
+            
 
         } catch (error) {
             console.error('Error:', error);
