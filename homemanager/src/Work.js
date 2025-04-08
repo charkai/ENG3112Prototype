@@ -3,7 +3,7 @@ import SettingCard from './shared-components/SettingCard';
 import HomeButton from './shared-components/HomeButton';
 import Popup from './shared-components/Popup';
 import BrightnessSlider from './shared-components/BrightnessSlider';
-import NoiseLevel from './shared-components/NoiseLevel'
+import HardcodeLevel from './shared-components/HardcodeLevel'
 import SedentaryCard from './shared-components/SedentaryCard';
 import { useState, useEffect } from 'react';
 
@@ -79,13 +79,14 @@ const Work = () => {
             "name": "Temperature", 
             "emoji": "🌡️",
             "description": "Adjust the temperature to your liking",
+            "children": <HardcodeLevel description="Currently 25°C"/>
             
         },
         {
             "name": "Noise", 
             "emoji": "🔊",
             "description": "Let's make sure that noise is within acceptable levels",
-            "children": <NoiseLevel/>
+            "children": <HardcodeLevel description="60 dB (Normal Conversation)"/>
             
         }
     ];
