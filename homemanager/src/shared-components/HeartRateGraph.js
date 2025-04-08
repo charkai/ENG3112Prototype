@@ -38,10 +38,10 @@ const HeartRateGraph = ({hrvValue}) => {
     }, [hrvValue]);
 
     return (
-        <div className="flex flex-col w-96 h-96 bg-white dark:border-gray-700 rounded-xl mb-10 sm:mb-0 bg-white dark:bg-gray-800 shadow-md flex items-center justify-center">
+        <div className="flex flex-col px-12 pb-8 bg-white border border-gray-100 dark:border-gray-700 rounded-xl mb-10 sm:mb-0 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
             <Gauge 
-                width={300} 
-                height={300} 
+                width={280} 
+                height={260} 
                 value={value} 
                 min={0}
                 max={200}
@@ -55,7 +55,7 @@ const HeartRateGraph = ({hrvValue}) => {
                         fill: '#7e22ce',
                     },
                 })}/>
-            <h2 className="text-2xl text-center text-gray-800 dark:text-gray-100 pb-10">Heart Rate Variability</h2>
+            <h2 className="text-2xl text-center text-gray-800 dark:text-gray-100">Heart Rate Variability</h2>
         </div>
     )
 }

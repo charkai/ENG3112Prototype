@@ -33,7 +33,7 @@ const SedentaryCard = () => {
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2"></path>
 </svg>
                 </Stats.Stat.Figure>
-                <Stats.Stat.Title className="text-xl">Total Time Worked</Stats.Stat.Title>
+                <Stats.Stat.Title className="text-xl">Total Time Worked Today</Stats.Stat.Title>
                 <Stats.Stat.Value className="text-purple-700">3 Hours</Stats.Stat.Value>
                 <Stats.Stat.Desc>You got this!</Stats.Stat.Desc>
             </Stats.Stat>

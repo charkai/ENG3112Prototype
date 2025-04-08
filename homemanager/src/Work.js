@@ -5,6 +5,7 @@ import Popup from './shared-components/Popup';
 import BrightnessSlider from './shared-components/BrightnessSlider';
 import HardcodeLevel from './shared-components/HardcodeLevel'
 import SedentaryCard from './shared-components/SedentaryCard';
+import CalendarCard from './shared-components/CalendarCard';
 import { useState, useEffect } from 'react';
 
 const Work = () => {
@@ -64,8 +65,27 @@ const Work = () => {
         setPopupTimeout(timeout);
     };
 
-    const handleAcceptChanges = () => {
+    const handleAcceptChanges = async() => {
         handleClosePopup();
+        try {
+            const response = await fetch('http://localhost:3001/api/luminosity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ value: 100 }),
+            });
+      
+            if (!response.ok) {
+                throw new Error('Arudino unable to communicate.');
+            }
+            const data = await response.json();
+            console.log('Success:', data);
+            setLuminosity(100)
+
+          } catch (error) {
+            console.error('Error:', error);
+          }
     };
 
     const settings = [
@@ -110,8 +130,9 @@ const Work = () => {
             </div>
             <div className="p-4 flex flex-row">
                 <HeartRateGraph hrvValue={hrvValue} />
-                <div className="ml-10 flex flex-col">
+                <div className="ml-12 flex flex-col space-y-6">
                     <SedentaryCard/>
+                    <CalendarCard/>
                 </div>
             </div>
             {showPopup && (
