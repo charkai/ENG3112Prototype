@@ -109,7 +109,7 @@ const Work = () => {
             </div>
             <div className="p-4 flex flex-row">
                 <HeartRateGraph hrvValue={hrvValue} />
-                <div className="p-2 flex flex-col">
+                <div className="ml-10 flex flex-col">
                     <SedentaryCard/>
                 </div>
             </div>
