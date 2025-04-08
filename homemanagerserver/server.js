@@ -14,8 +14,7 @@ app.use(express.json());
 app.post("/api/luminosity", (req, res) => {
 	const { value } = req.body;
 	if (value >= 0 && value <= 255) {
-		// TODO: ACTUALLY WRITE TO ARDUINO
-		// setLuminosity(value); 
+		setLuminosity(value); 
 		console.log(`Luminosity successfully changed to ${value}`);
 		res.status(200).json({ message: `Luminosity successfully changed to ${value}` });
 	} 
@@ -26,18 +25,13 @@ app.post("/api/luminosity", (req, res) => {
 
 // API route for getting current luminosity
 app.get("/api/luminosity", (req, res) => {
-
-	// TODO: ACTUALLY READ FROM ARDUINO
-	const currentLuminosity = 200;
-	// const currentLuminosity = getCurrentLuminosity();
+	const currentLuminosity = getCurrentLuminosity();
 	res.status(200).json({ luminosity: currentLuminosity });
 });
 
 // API route for getting current HRV
 app.get("/api/hrv", (req, res) => {
-	// TODO: ACTUALLY READ FROM ARDUINO
-	const hrv = 42;
-	// const hrv = getCurrentHRV();
+	const hrv = getCurrentHRV();
 	res.status(200).json({ hrv: hrv });
 });
 

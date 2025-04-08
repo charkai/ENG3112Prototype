@@ -18,9 +18,14 @@ const Work = () => {
         const fetchHRV = async () => {
             try {
                 const response = await fetch('http://localhost:3001/api/hrv');
+                if (!response.ok) {
+                    throw new Error('Arudino unable to communicate. Reverting to hardcoded value');
+                }
                 const data = await response.json();
                 setHrvValue(data.hrv);
             } catch (error) {
+                // resorting to hardcoded value if API isn't able to connect to arduino 
+                setHrvValue(42);
                 console.error('Error fetching HRV:', error);
             }
         };
@@ -28,9 +33,14 @@ const Work = () => {
         const fetchLuminosity = async () => {
             try {
                 const response = await fetch('http://localhost:3001/api/luminosity');
+                if (!response.ok) {
+                    throw new Error('Arudino unable to communicate. Reverting to hardcoded value');
+                }
                 const data = await response.json();
                 setLuminosity(data.luminosity);
             } catch (error) {
+                // resorting to hardcoded value if API isn't able to connect to arduino 
+                setLuminosity(200);
                 console.error('Error fetching luminosity:', error);
             }
         };
@@ -59,9 +69,10 @@ const Work = () => {
 
     const handleClosePopup = () => {
         setShowPopup(false);
+        // POPUP ONLY APPEARS EVERY 20 minutes- PREVENTS ANNOYING THE USER
         const timeout = setTimeout(() => {
             setPopupTimeout(null);
-        }, 20 * 60 * 1000); // 20 minutes
+        }, 20 * 60 * 1000); 
         setPopupTimeout(timeout);
     };
 
@@ -83,9 +94,9 @@ const Work = () => {
             console.log('Success:', data);
             setLuminosity(100)
 
-          } catch (error) {
+        } catch (error) {
             console.error('Error:', error);
-          }
+        }
     };
 
     const settings = [
