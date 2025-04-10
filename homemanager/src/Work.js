@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 const Work = () => {
     const [hrvValue, setHrvValue] = useState(0);
     const [luminosity, setLuminosity] = useState(0);
+    const [isSitting, setIsSitting] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
     const [popupTimeout, setPopupTimeout] = useState(null);
 
@@ -45,19 +46,39 @@ const Work = () => {
             }
         };
 
+        const fetchIsSitting = async() => {
+            try {
+                const response = await fetch('http://localhost:3001/api/sitting');
+                if (!response.ok) {
+                    throw new Error('Arudino unable to communicate. Reverting to hardcoded value');
+                }
+                const data = await response.json();
+                setIsSitting(data.isSitting);
+            } catch (error) {
+                // resorting to hardcoded value if API isn't able to connect to arduino 
+                setIsSitting(true);
+                console.error('Error fetching sitting data:', error);
+            }
+        }
+
         fetchHRV();
         fetchLuminosity();
+        fetchIsSitting();
 
         // Interval fetches HRV every 5 seconds
         const hrvInterval = setInterval(fetchHRV, 5000);
 
-        // Interval fetches luminosity every 20 seconds
-        const luminosityInterval = setInterval(fetchLuminosity, 20000);
+        // Interval fetches luminosity every 5 seconds
+        const luminosityInterval = setInterval(fetchLuminosity, 5000);
+
+        // Interval fetches Sitting Data every 5 seconds
+        const sittingInterval = setInterval(fetchIsSitting, 5000);
 
         // Cleanup interval on unmount
         return () => {
             clearInterval(hrvInterval);
             clearInterval(luminosityInterval);
+            clearInterval(sittingInterval);
         };
     }, []);
 
@@ -143,7 +164,8 @@ const Work = () => {
             <div className="p-4 flex flex-row">
                 <HeartRateGraph hrvValue={hrvValue} />
                 <div className="ml-12 flex flex-col space-y-6">
-                    <SedentaryCard/>
+                    <SedentaryCard
+                        sittingOrStanding={isSitting ? 'Sitting': 'Standing'}/>
                     <CalendarCard/>
                 </div>
             </div>

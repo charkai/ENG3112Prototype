@@ -3,6 +3,7 @@ const { ReadlineParser } = require("@serialport/parser-readline");
 
 let pulses = [];
 let luminosity = 0;
+let isSitting = 0;
 
 const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB4";
 let serialPort;
@@ -19,8 +20,8 @@ function initializeSerialPort() {
 
 		const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }));
 
-		// Handle serial data received from Arduino
-		// TODO: THIS RELIES ON ARDUINO DATA BEING SENT AS 'pulseInterval,luminosity'
+		// Handle serial data received from Arduino	
+		// TODO: THIS RELIES ON ARDUINO DATA BEING SENT AS 'pulseInterval,luminosity, isSitting'
 		parser.on("data", (data) => {
 			const parsedData = data.trim().split(",");
 			if (parsedData.length === 2) {
@@ -42,9 +43,16 @@ function initializeSerialPort() {
 				if (luminosityValue) {
 					luminosity = luminosityValue;
 				}
+
+
+				/// THIRD = 1 OR 0 FOR SITTING OR STANDING (1 FOR SITTING, 0 FOR STANDING)
+				const sittingValue = parseInt(parsedData[2], 10);
+				if (sittingValue) {
+					isSitting = sittingValue;
+				}
 			}
 			else {
-				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity'");
+				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity, isSitting'");
 			}
 		});
 			
@@ -76,6 +84,14 @@ function calculateHRV(intervals) {
  */
 function getCurrentHRV() {
   	return calculateHRV(pulses);
+}
+
+/**
+ * Gets whether the pressure sensor is active or not (i.e. user is 'sitting or standing')
+ * @returns A boolean - 1 for sitting, 0 for standing
+ */
+function getIsSitting() {
+	return isSitting;
 }
 
 /**
@@ -113,4 +129,5 @@ module.exports = {
 	getCurrentHRV,
 	getCurrentLuminosity,
 	setLuminosity,
+	getIsSitting
 };

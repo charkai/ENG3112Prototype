@@ -5,7 +5,7 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // Import luminosity control logic
-const { setLuminosity, getCurrentLuminosity, getCurrentHRV } = require("./arduino");
+const { setLuminosity, getCurrentLuminosity, getCurrentHRV, getIsSitting } = require("./arduino");
 
 app.use(cors());
 app.use(express.json());
@@ -34,6 +34,12 @@ app.get("/api/hrv", (req, res) => {
 	const hrv = getCurrentHRV();
 	res.status(200).json({ hrv: hrv });
 });
+
+// API route for getting if currently sitting or not 
+app.get("/api/sitting", (req, res) => {
+	const isSitting = getIsSitting();
+	res.status(200).json({ isSitting: isSitting });
+})
 
 // Start the server
 app.listen(port, () => {
