@@ -5,7 +5,7 @@ let pulses = [];
 let luminosity = 0;
 let isSitting = 0;
 
-const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB4";
+const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB0";
 let serialPort;
 
 /**
@@ -107,21 +107,24 @@ function getCurrentLuminosity() {
  * @param {number} brightness - The brightness value to set (0-255) 
  */
 function setLuminosity(brightness) {
-	port.open((err) => {
-		if (err) {
-			console.error(`Failed to open the serial port: ${err.message}`);
-		} else {
-			console.log("Arduino port opened uccessfully.");
-		}
-  	});
+    
+    if (!serialPort.isOpen) {
+        serialPort.open((err) => {
+            if (err) {
+                console.error(`Failed to open the serial port: ${err.message}`);
+            } else {
+                console.log("Arduino port opened successfully.");
+            }
+        });
+    }
 
-	port.write(`${brightness}\n`, (err) => {
-		if (err) {
-			console.error(`Error sending data to Arduino: ${err.message}`);
-			return response.status(500).json({error: "Unable to send data to Arduino"});
-		}
-	});
+    serialPort.write(`${brightness}\n`, (err) => {
+        if (err) {
+            console.error(`Error sending data to Arduino: ${err.message}`);
+        }
+    });
 }
+
 
 initializeSerialPort();
 
