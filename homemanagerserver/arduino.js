@@ -25,7 +25,7 @@ function initializeSerialPort() {
         // This relies on Arduino data being sent as 'pulseInterval,luminosity,isSitting'
         parser.on("data", (data) => {
             const parsedData = data.trim().split(",");
-            if (parsedData.length === 3) {
+            if (parsedData.length === 4) {
                 // FIRST in data = pulse interval
                 const pulseInterval = parseInt(parsedData[0], 10);
                 if (!isNaN(pulseInterval)) {
@@ -44,24 +44,21 @@ function initializeSerialPort() {
                 if (!isNaN(luminosityValue)) {
                     luminosity = luminosityValue;
                 }
-
-
 				/// THIRD = 1 OR 0 for WARM OR COOL (1 FOR WARM 0 FOR COOL)
-				const warmValue = parseInt(parsedData[2], 10)
-				if (warmValue) {
-					isWarm = warmValue;
+				const isWarmValue = parseInt(parsedData[2], 10);
+				if (isWarmValue == 0 || isWarmValue == 1) {
+					isWarm = isWarmValue;
 				}
 
 				/// FOURTH = 1 OR 0 FOR SITTING OR STANDING (1 FOR SITTING, 0 FOR STANDING)
 				const sittingValue = parseInt(parsedData[3], 10);
-				if (sittingValue) {
+				if (sittingValue == 0 || sittingValue == 1) {
 					isSitting = sittingValue;
 				}
 
-				
 			}
 			else {
-				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity, isSitting'");
+				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity, warmValue, isSitting'");
 			}
 		});
 			

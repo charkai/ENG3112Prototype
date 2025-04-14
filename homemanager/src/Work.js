@@ -12,7 +12,7 @@ const Work = () => {
     const [hrvValue, setHrvValue] = useState(0);
     const [luminosity, setLuminosity] = useState(0);
     const [isSitting, setIsSitting] = useState(true);
-    const [isWarm, setIsWarm] = useState(false);
+    const [isWarm, setIsWarm] = useState(0);
     const [showPopup, setShowPopup] = useState(false);
     const [popupTimeout, setPopupTimeout] = useState(null);
 
