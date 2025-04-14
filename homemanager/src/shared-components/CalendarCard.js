@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 
-const CalendarCard = () => {
+const CalendarCard = ({number, description}) => {
 
     return (
         <div class="flex flex-col p-6 items-center bg-white border border-gray-100 rounded-lg shadow-sm md:flex-row  dark:border-gray-700 dark:bg-gray-800">
@@ -10,7 +10,7 @@ const CalendarCard = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 2v4M8 2v4M3 10h18"></path>
             </svg>
             <div class="flex flex-col justify-between items-center p-4 leading-normal w-full">
-                <h5 class="text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">You have <span class="text-purple-700">8</span> events in your work calendar today. </h5>
+                <h5 class="text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">You have <span class="text-purple-700">{number}</span> events in your {description} calendar today. </h5>
                 
                 <Link
                     to ="https://calendar.google.com/calendar/u/0/r?pli=1"

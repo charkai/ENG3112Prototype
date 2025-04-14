@@ -1,5 +1,7 @@
 import SettingCard from "./shared-components/SettingCard";
 import HomeButton from "./shared-components/HomeButton";
+import CalendarCard from "./shared-components/CalendarCard";
+import PersonalCard from "./shared-components/PersonalCard";
 
 const Personal = () => {
 
@@ -34,6 +36,12 @@ const Personal = () => {
                     description={setting.description}
                 />
             ))}
+            </div>
+            <div className="p-4 flex flex-row">
+        
+                <CalendarCard number={2} description={"personal"}/>
+                <PersonalCard/>
+          
             </div>
         </div>
     )

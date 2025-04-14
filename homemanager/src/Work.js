@@ -186,7 +186,7 @@ const Work = () => {
                 <div className="ml-12 flex flex-col space-y-6">
                     <SedentaryCard
                         sittingOrStanding={isSitting ? 'Sitting': 'Standing'}/>
-                    <CalendarCard/>
+                    <CalendarCard number={8} description={"work"}/>
                 </div>
             </div>
             {showPopup && (
