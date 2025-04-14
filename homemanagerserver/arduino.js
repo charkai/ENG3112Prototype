@@ -4,6 +4,7 @@ const { ReadlineParser } = require("@serialport/parser-readline");
 let pulses = [];
 let luminosity = 0;
 let isSitting = 0;
+let isWarm = 0;
 
 const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB0";
 let serialPort;
@@ -21,7 +22,7 @@ function initializeSerialPort() {
 		const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }));
 
 		// Handle serial data received from Arduino	
-		// TODO: THIS RELIES ON ARDUINO DATA BEING SENT AS 'pulseInterval,luminosity, isSitting'
+		// TODO: THIS RELIES ON ARDUINO DATA BEING SENT AS 'pulseInterval,luminosity, warmth, isSitting'
 		parser.on("data", (data) => {
 			const parsedData = data.trim().split(",");
 			if (parsedData.length === 2) {
@@ -45,11 +46,19 @@ function initializeSerialPort() {
 				}
 
 
-				/// THIRD = 1 OR 0 FOR SITTING OR STANDING (1 FOR SITTING, 0 FOR STANDING)
-				const sittingValue = parseInt(parsedData[2], 10);
+				/// THIRD = 1 OR 0 for WARM OR COOL (1 FOR WARM 0 FOR COOL)
+				const warmValue = parseInt(parsedData[2], 10)
+				if (warmValue) {
+					isWarm = warmValue;
+				}
+
+				/// FOURTH = 1 OR 0 FOR SITTING OR STANDING (1 FOR SITTING, 0 FOR STANDING)
+				const sittingValue = parseInt(parsedData[3], 10);
 				if (sittingValue) {
 					isSitting = sittingValue;
 				}
+
+				
 			}
 			else {
 				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity, isSitting'");
@@ -103,10 +112,19 @@ function getCurrentLuminosity() {
 }
 
 /**
- * Set the luminosity of the light on the Arduino
- * @param {number} brightness - The brightness value to set (0-255) 
+ * Gets whether light is warm or cold
+ * @returns {boolean} - 1 if light is 'warm', 0 if 'cold'
  */
-function setLuminosity(brightness) {
+function getIsWarm() {
+	return isWarm;
+}
+
+/**
+ * Set the luminosity and warmth of the light on the Arduino
+ * @param {number} brightness - The brightness value to set (0-255) 
+ * @param {boolean} isWarm - whether to set to WARM (1) or COOL (0)
+ */
+function adjustLight(brightness, isWarm) {
     
     if (!serialPort.isOpen) {
         serialPort.open((err) => {
@@ -118,19 +136,19 @@ function setLuminosity(brightness) {
         });
     }
 
-    serialPort.write(`${brightness}\n`, (err) => {
+    serialPort.write(`${brightness} ${isWarm}\n`, (err) => {
         if (err) {
             console.error(`Error sending data to Arduino: ${err.message}`);
         }
     });
 }
 
-
 initializeSerialPort();
 
 module.exports = {
 	getCurrentHRV,
+	getIsWarm,
 	getCurrentLuminosity,
-	setLuminosity,
+	adjustLight,
 	getIsSitting
 };

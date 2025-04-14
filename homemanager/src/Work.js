@@ -12,6 +12,7 @@ const Work = () => {
     const [hrvValue, setHrvValue] = useState(0);
     const [luminosity, setLuminosity] = useState(0);
     const [isSitting, setIsSitting] = useState(true);
+    const [isWarm, setIsWarm] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [popupTimeout, setPopupTimeout] = useState(null);
 
@@ -31,7 +32,7 @@ const Work = () => {
             }
         };
 
-        const fetchLuminosity = async () => {
+        const fetchLight = async () => {
             try {
                 const response = await fetch('http://localhost:3001/api/luminosity');
                 if (!response.ok) {
@@ -39,9 +40,11 @@ const Work = () => {
                 }
                 const data = await response.json();
                 setLuminosity(data.luminosity);
+                setIsWarm(data.isWarm);
             } catch (error) {
                 // resorting to hardcoded value if API isn't able to connect to arduino 
                 setLuminosity(200);
+                setIsWarm(false);
                 console.error('Error fetching luminosity:', error);
             }
         };
@@ -62,17 +65,17 @@ const Work = () => {
         }
 
         fetchHRV();
-        fetchLuminosity();
+        fetchLight();
         fetchIsSitting();
 
-        // Interval fetches HRV every 5 seconds
-        const hrvInterval = setInterval(fetchHRV, 5000);
+        // Interval fetches HRV every 2 seconds
+        const hrvInterval = setInterval(fetchHRV, 2000);
 
-        // Interval fetches luminosity every 5 seconds
-        const luminosityInterval = setInterval(fetchLuminosity, 5000);
+        // Interval fetches luminosity every 2 seconds
+        const luminosityInterval = setInterval(fetchLight, 5000);
 
-        // Interval fetches Sitting Data every 5 seconds
-        const sittingInterval = setInterval(fetchIsSitting, 5000);
+        // Interval fetches Sitting Data every 2 seconds
+        const sittingInterval = setInterval(fetchIsSitting, 2000);
 
         // Cleanup interval on unmount
         return () => {
@@ -106,7 +109,7 @@ const Work = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ value: 100 }),
+                body: JSON.stringify({ newLuminosity: luminosity, warmthOn: isWarm }),
             });
       
             if (!response.ok) {
@@ -114,7 +117,6 @@ const Work = () => {
             }
             const data = await response.json();
             console.log('Success:', data);
-            
 
         } catch (error) {
             console.error('Error:', error);
@@ -126,7 +128,7 @@ const Work = () => {
             "name": "Lighting", 
             "emoji": "💡",
             "description": "Ensure the lighting will maximise your productivity",
-            "children": <BrightnessSlider luminosity={luminosity} onLuminosityChange={setLuminosity} />
+            "children": <BrightnessSlider luminosity={luminosity} onLuminosityChange={setLuminosity} isWarm={isWarm} onWarmthChange={setIsWarm}/>
         },
         {
             "name": "Temperature", 
