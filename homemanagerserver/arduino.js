@@ -6,6 +6,10 @@ let luminosity = 0;
 let isSitting = 0;
 let isWarm = 0;
 
+// Flag to indicate that initial Arduino values have been recorded.
+// Once set to true, subsequent Arduino data will not override the LED settings.
+let arduinoInitialized = false;
+
 const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB0";
 let serialPort;
 
@@ -22,11 +26,11 @@ function initializeSerialPort() {
         const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }));
 
         // Handle serial data received from Arduino.
-        // This relies on Arduino data being sent as 'pulseInterval,luminosity,isSitting'
+        // Arduino now sends data as 'pulseInterval,luminosity,warmthSetting,isSitting'
         parser.on("data", (data) => {
             const parsedData = data.trim().split(",");
             if (parsedData.length === 4) {
-                // FIRST in data = pulse interval
+                // --- Always update the pulse intervals for HRV calculations ---
                 const pulseInterval = parseInt(parsedData[0], 10);
                 if (!isNaN(pulseInterval)) {
                     pulses.push(pulseInterval);
@@ -38,34 +42,47 @@ function initializeSerialPort() {
                         console.log(`HRV: ${hrv}`);
                     }
                 }
+                
+                // --- Update LED-related values only if not already initialized ---
+                if (!arduinoInitialized) {
+                    // SECOND in data = luminosity of the LED (average brightness)
+                    const luminosityValue = parseInt(parsedData[1], 10);
+                    if (!isNaN(luminosityValue)) {
+                        luminosity = luminosityValue;
+                    }
 
-                // SECOND in data = luminosity of the light.
-                const luminosityValue = parseInt(parsedData[1], 10);
-                if (!isNaN(luminosityValue)) {
-                    luminosity = luminosityValue;
+                    // THIRD in data = warmth setting (1 for warm, 0 for cool)
+                    const isWarmValue = parseInt(parsedData[2], 10);
+                    if (isWarmValue === 0 || isWarmValue === 1) {
+                        isWarm = isWarmValue;
+                    }
+
+                    // FOURTH in data = sitting state (1 for sitting, 0 for standing)
+                    const sittingValue = parseInt(parsedData[3], 10);
+                    if (sittingValue === 0 || sittingValue === 1) {
+                        isSitting = sittingValue;
+                    }
+                    
+                    // Mark as initialized so subsequent data does not override front-end settings.
+                    arduinoInitialized = true;
+                    console.log("Arduino initial values loaded:");
+                    console.log(`Luminosity: ${luminosity}, Warmth: ${isWarm}, Sitting: ${isSitting}`);
                 }
-				/// THIRD = 1 OR 0 for WARM OR COOL (1 FOR WARM 0 FOR COOL)
-				const isWarmValue = parseInt(parsedData[2], 10);
-				if (isWarmValue == 0 || isWarmValue == 1) {
-					isWarm = isWarmValue;
-				}
-
-				/// FOURTH = 1 OR 0 FOR SITTING OR STANDING (1 FOR SITTING, 0 FOR STANDING)
-				const sittingValue = parseInt(parsedData[3], 10);
-				if (sittingValue == 0 || sittingValue == 1) {
-					isSitting = sittingValue;
-				}
-
-			}
-			else {
-				throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity, warmValue, isSitting'");
-			}
-		});
+            } else {
+                throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity,warmthSetting,isSitting'");
+            }
+        });
 			
-		// Error handling for serial port
-		serialPort.on("error", (err) => {
-			console.error("Port error:", err.message);
-		});
+        // Error handling for serial port.
+        serialPort.on("error", (err) => {
+            console.error("Port error:", err.message);
+        });
+
+        // Listen for port closure (e.g. Arduino disconnect).
+        serialPort.on("close", () => {
+            console.log("Serial port closed. Resetting Arduino initialization flag.");
+            arduinoInitialized = false;
+        });
   	} 
 	catch (err) {
 		console.error("Port error:", err.message);
@@ -101,7 +118,8 @@ function getIsSitting() {
 }
 
 /**
- * Get the current luminosity of the light on the Arduino
+ * Get the current luminosity of the LED set on the Arduino.
+ * This value reflects the LED brightness as last initialized.
  * @returns {number} - The current luminosity value (0-255)
  */
 function getCurrentLuminosity() {
@@ -109,19 +127,21 @@ function getCurrentLuminosity() {
 }
 
 /**
- * Gets whether light is warm or cold
- * @returns {boolean} - 1 if light is 'warm', 0 if 'cold'
+ * Gets whether the LED is warm or cool.
+ * @returns {number} - 1 if LED is 'warm', 0 if 'cool'
  */
 function getIsWarm() {
 	return isWarm;
 }
 
 /**
- * Set the luminosity and warmth of the light on the Arduino
- * @param {number} brightness - The brightness value to set (0-255) 
- * @param {boolean} isWarm - whether to set to WARM (1) or COOL (0)
+ * Set the LED brightness and warmth on the Arduino.
+ * This sends a command to the Arduino in the format:
+ * "LEDbrightness, warmthSetting" (with warmthSetting being 1 or 0)
+ * @param {number} brightness - The brightness value to set (0-255)
+ * @param {boolean} warm - true for WARM, false for COOL
  */
-function adjustLight(brightness, isWarm) {
+function adjustLight(brightness, warm) {
     
     if (!serialPort.isOpen) {
         serialPort.open((err) => {
@@ -133,7 +153,12 @@ function adjustLight(brightness, isWarm) {
         });
     }
 
-    serialPort.write(`${brightness} ${isWarm}\n`, (err) => {
+    // When the front end sends a new command via adjustLight, we want
+    // to override the Arduino-provided values. We also reset our initialization flag.
+    arduinoInitialized = false;
+
+    const warmthValue = warm ? 1 : 0;
+    serialPort.write(`${brightness},${warmthValue}\n`, (err) => {
         if (err) {
             console.error(`Error sending data to Arduino: ${err.message}`);
         }
