@@ -91,6 +91,23 @@ const Work = () => {
         }
     }, [hrvValue, popupTimeout]);
 
+    
+    // AUTOMATICALLY TRIGGER POPUP - IN CASE OF EMERGENCY!
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'p') { 
+                setShowPopup(true);
+            }
+        };
+    
+        window.addEventListener('keydown', handleKeyDown);
+    
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+    
+
     const handleClosePopup = () => {
         setShowPopup(false);
         // POPUP ONLY APPEARS EVERY 20 minutes- PREVENTS ANNOYING THE USER
@@ -104,6 +121,7 @@ const Work = () => {
         handleClosePopup();
         try {
             setLuminosity(100);
+            setIsWarm(1);
             const response = await fetch('http://localhost:3001/api/luminosity', {
                 method: 'POST',
                 headers: {
