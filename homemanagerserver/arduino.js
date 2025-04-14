@@ -14,36 +14,36 @@ let serialPort;
  */
 function initializeSerialPort() {
     try {
-      	serialPort = new SerialPort({
-			path: ARDUINO_PORT,
-			baudRate: 9600,
-      	});
+        serialPort = new SerialPort({
+            path: ARDUINO_PORT,
+            baudRate: 9600,
+        });
 
-		const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }));
+        const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }));
 
-		// Handle serial data received from Arduino	
-		// TODO: THIS RELIES ON ARDUINO DATA BEING SENT AS 'pulseInterval,luminosity, warmth, isSitting'
-		parser.on("data", (data) => {
-			const parsedData = data.trim().split(",");
-			if (parsedData.length === 2) {
-				// FIRST IN DATA = pulse interval
-				const pulseInterval = parseInt(parsedData[0], 10);
-				if (pulseInterval) {
-					pulses.push(pulseInterval);
+        // Handle serial data received from Arduino.
+        // This relies on Arduino data being sent as 'pulseInterval,luminosity,isSitting'
+        parser.on("data", (data) => {
+            const parsedData = data.trim().split(",");
+            if (parsedData.length === 3) {
+                // FIRST in data = pulse interval
+                const pulseInterval = parseInt(parsedData[0], 10);
+                if (!isNaN(pulseInterval)) {
+                    pulses.push(pulseInterval);
 
-					// Calculate HRV after every 10 
-					if (pulses.length >= 10) {
-						const hrv = calculateHRV(pulses);
-						pulses = []; // Reset after calculation
-						console.log(`HRV: ${hrv}`);
-					}
-				}
+                    // Calculate HRV after every 10 pulses.
+                    if (pulses.length >= 10) {
+                        const hrv = calculateHRV(pulses);
+                        pulses = []; // Reset after calculation.
+                        console.log(`HRV: ${hrv}`);
+                    }
+                }
 
-				// SECOND = THE CURRENT LUMINOSITY OF THE LIGHT
-				const luminosityValue = parseInt(parsedData[1], 10);
-				if (luminosityValue) {
-					luminosity = luminosityValue;
-				}
+                // SECOND in data = luminosity of the light.
+                const luminosityValue = parseInt(parsedData[1], 10);
+                if (!isNaN(luminosityValue)) {
+                    luminosity = luminosityValue;
+                }
 
 
 				/// THIRD = 1 OR 0 for WARM OR COOL (1 FOR WARM 0 FOR COOL)
@@ -81,10 +81,10 @@ function initializeSerialPort() {
  * @returns {number} - The HRV value
  */
 function calculateHRV(intervals) {
-	const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-	const squareDiffs = intervals.map((interval) => Math.pow(interval - mean, 2));
-	const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
-	return Math.sqrt(avgSquareDiff); // Standard deviation = HRV
+    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const squareDiffs = intervals.map((interval) => Math.pow(interval - mean, 2));
+    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
+    return Math.sqrt(avgSquareDiff); // Standard deviation = HRV
 }
 
 /**
@@ -92,15 +92,15 @@ function calculateHRV(intervals) {
  * @returns {number} - The HRV value
  */
 function getCurrentHRV() {
-  	return calculateHRV(pulses);
+    return calculateHRV(pulses);
 }
 
 /**
- * Gets whether the pressure sensor is active or not (i.e. user is 'sitting or standing')
- * @returns A boolean - 1 for sitting, 0 for standing
+ * Gets whether the pressure sensor is active or not (i.e. user is 'sitting' or 'standing')
+ * @returns {number} - 1 for sitting, 0 for standing
  */
 function getIsSitting() {
-	return isSitting;
+    return isSitting;
 }
 
 /**
@@ -108,7 +108,7 @@ function getIsSitting() {
  * @returns {number} - The current luminosity value (0-255)
  */
 function getCurrentLuminosity() {
-	return luminosity;
+    return luminosity;
 }
 
 /**
