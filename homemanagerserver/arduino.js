@@ -2,13 +2,9 @@ const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 
 let pulses = [];
-let luminosity = 0;
+let luminosity = 0;  // Driven solely by the front end
 let isSitting = 0;
-let isWarm = 0;
-
-// Flag to indicate that initial Arduino LED values have been recorded.
-// Once set to true, subsequent Arduino data will not override the LED settings.
-let arduinoInitialized = false;
+let isWarm = 0;      // Driven solely by the front end
 
 const ARDUINO_PORT = process.env.ARDUINO_PORT || "/dev/ttyUSB0";
 let serialPort;
@@ -27,10 +23,11 @@ function initializeSerialPort() {
 
         // Handle serial data received from Arduino.
         // Arduino now sends data as 'pulseInterval,luminosity,warmthSetting,isSitting'
+        // We ignore the LED luminosity and warmth values since those will be driven by the front end.
         parser.on("data", (data) => {
             const parsedData = data.trim().split(",");
             if (parsedData.length === 4) {
-                // --- Always update the pulse intervals for HRV calculations ---
+                // --- Update the pulse intervals for HRV calculations ---
                 const pulseInterval = parseInt(parsedData[0], 10);
                 if (!isNaN(pulseInterval)) {
                     pulses.push(pulseInterval);
@@ -43,27 +40,7 @@ function initializeSerialPort() {
                     }
                 }
                 
-                // --- Update LED-related values only if not already initialized ---
-                if (!arduinoInitialized) {
-                    // SECOND in data = luminosity of the LED (average brightness)
-                    const luminosityValue = parseInt(parsedData[1], 10);
-                    if (!isNaN(luminosityValue)) {
-                        luminosity = luminosityValue;
-                    }
-
-                    // THIRD in data = warmth setting (1 for warm, 0 for cool)
-                    const isWarmValue = parseInt(parsedData[2], 10);
-                    if (isWarmValue === 0 || isWarmValue === 1) {
-                        isWarm = isWarmValue;
-                    }
-
-                    // Mark as initialized so subsequent data does not override front-end LED settings.
-                    arduinoInitialized = true;
-                    console.log("Arduino initial LED values loaded:");
-                    console.log(`Luminosity: ${luminosity}, Warmth: ${isWarm}`);
-                }
-
-                // --- Always update the sitting state, regardless of initialization ---
+                // --- Update the sitting state regardless of LED-related data ---
                 const sittingValue = parseInt(parsedData[3], 10);
                 if (sittingValue === 0 || sittingValue === 1) {
                     isSitting = sittingValue;
@@ -81,8 +58,7 @@ function initializeSerialPort() {
 
         // Listen for port closure (e.g. Arduino disconnect).
         serialPort.on("close", () => {
-            console.log("Serial port closed. Resetting Arduino initialization flag.");
-            arduinoInitialized = false;
+            console.log("Serial port closed.");
         });
   	} 
 	catch (err) {
@@ -119,8 +95,8 @@ function getIsSitting() {
 }
 
 /**
- * Get the current luminosity of the LED set on the Arduino.
- * This value reflects the LED brightness as last initialized.
+ * Get the current luminosity of the LED.
+ * This value is maintained by the front-end via adjustLight.
  * @returns {number} - The current luminosity value (0-255)
  */
 function getCurrentLuminosity() {
@@ -129,6 +105,7 @@ function getCurrentLuminosity() {
 
 /**
  * Gets whether the LED is warm or cool.
+ * This value is maintained solely by the front-end.
  * @returns {number} - 1 if LED is 'warm', 0 if 'cool'
  */
 function getIsWarm() {
@@ -138,7 +115,8 @@ function getIsWarm() {
 /**
  * Set the LED brightness and warmth on the Arduino.
  * This sends a command to the Arduino in the format:
- * "LEDbrightness,warmthSetting" (with warmthSetting being 1 or 0)
+ * "LEDbrightness,warmthSetting" (with warmthSetting being 1 or 0).
+ * This command drives the LED settings, overriding any Arduino-provided values.
  * @param {number} brightness - The brightness value to set (0-255)
  * @param {boolean} warm - true for WARM, false for COOL
  */
@@ -154,12 +132,11 @@ function adjustLight(brightness, warm) {
         });
     }
 
-    // When the front end sends a new command via adjustLight, we want
-    // to override the Arduino-provided values. We also reset our initialization flag.
-    arduinoInitialized = false;
+    // Update our local variables to reflect the front-end command.
+    luminosity = brightness;
+    isWarm = warm ? 1 : 0;
 
-    const warmthValue = warm ? 1 : 0;
-    serialPort.write(`${brightness},${warmthValue}\n`, (err) => {
+    serialPort.write(`${brightness},${isWarm}\n`, (err) => {
         if (err) {
             console.error(`Error sending data to Arduino: ${err.message}`);
         }
