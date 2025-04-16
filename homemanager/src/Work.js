@@ -127,7 +127,7 @@ const Work = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ newLuminosity: luminosity, warmthOn: isWarm }),
+                body: JSON.stringify({ newLuminosity: 100, warmthOn: 1 }),
             });
       
             if (!response.ok) {
