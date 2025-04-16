@@ -6,7 +6,7 @@ let luminosity = 0;
 let isSitting = 0;
 let isWarm = 0;
 
-// Flag to indicate that initial Arduino values have been recorded.
+// Flag to indicate that initial Arduino LED values have been recorded.
 // Once set to true, subsequent Arduino data will not override the LED settings.
 let arduinoInitialized = false;
 
@@ -57,18 +57,19 @@ function initializeSerialPort() {
                         isWarm = isWarmValue;
                     }
 
-                    // FOURTH in data = sitting state (1 for sitting, 0 for standing)
-                    const sittingValue = parseInt(parsedData[3], 10);
-                    if (sittingValue === 0 || sittingValue === 1) {
-                        isSitting = sittingValue;
-                    }
-                    
-                    // Mark as initialized so subsequent data does not override front-end settings.
+                    // Mark as initialized so subsequent data does not override front-end LED settings.
                     arduinoInitialized = true;
-                    console.log("Arduino initial values loaded:");
-                    console.log(`Luminosity: ${luminosity}, Warmth: ${isWarm}, Sitting: ${isSitting}`);
+                    console.log("Arduino initial LED values loaded:");
+                    console.log(`Luminosity: ${luminosity}, Warmth: ${isWarm}`);
                 }
-            } else {
+
+                // --- Always update the sitting state, regardless of initialization ---
+                const sittingValue = parseInt(parsedData[3], 10);
+                if (sittingValue === 0 || sittingValue === 1) {
+                    isSitting = sittingValue;
+                }
+            }
+            else {
                 throw new Error("Invalid data received from Arduino, it must be sent as 'pulseInterval,luminosity,warmthSetting,isSitting'");
             }
         });
@@ -137,7 +138,7 @@ function getIsWarm() {
 /**
  * Set the LED brightness and warmth on the Arduino.
  * This sends a command to the Arduino in the format:
- * "LEDbrightness, warmthSetting" (with warmthSetting being 1 or 0)
+ * "LEDbrightness,warmthSetting" (with warmthSetting being 1 or 0)
  * @param {number} brightness - The brightness value to set (0-255)
  * @param {boolean} warm - true for WARM, false for COOL
  */
