@@ -32,22 +32,22 @@ const Work = () => {
             }
         };
 
-        const fetchLight = async () => {
-            try {
-                const response = await fetch('http://localhost:3001/api/luminosity');
-                if (!response.ok) {
-                    throw new Error('Arudino unable to communicate. Reverting to hardcoded value');
-                }
-                const data = await response.json();
-                setLuminosity(data.luminosity);
-                setIsWarm(data.isWarm);
-            } catch (error) {
-                // resorting to hardcoded value if API isn't able to connect to arduino 
-                setLuminosity(200);
-                setIsWarm(false);
-                console.error('Error fetching luminosity:', error);
-            }
-        };
+        // const fetchLight = async () => {
+        //     try {
+        //         const response = await fetch('http://localhost:3001/api/luminosity');
+        //         if (!response.ok) {
+        //             throw new Error('Arudino unable to communicate. Reverting to hardcoded value');
+        //         }
+        //         const data = await response.json();
+        //         setLuminosity(data.luminosity);
+        //         setIsWarm(data.isWarm);
+        //     } catch (error) {
+        //         // resorting to hardcoded value if API isn't able to connect to arduino 
+        //         setLuminosity(200);
+        //         setIsWarm(false);
+        //         console.error('Error fetching luminosity:', error);
+        //     }
+        // };
 
         const fetchIsSitting = async() => {
             try {
@@ -65,14 +65,14 @@ const Work = () => {
         }
 
         fetchHRV();
-        fetchLight();
+        // fetchLight();
         fetchIsSitting();
 
         // Interval fetches HRV every 2 seconds
         const hrvInterval = setInterval(fetchHRV, 2000);
 
         // Interval fetches luminosity every 2 seconds
-        const luminosityInterval = setInterval(fetchLight, 5000);
+        // const luminosityInterval = setInterval(fetchLight, 5000);
 
         // Interval fetches Sitting Data every 2 seconds
         const sittingInterval = setInterval(fetchIsSitting, 2000);
@@ -80,7 +80,7 @@ const Work = () => {
         // Cleanup interval on unmount
         return () => {
             clearInterval(hrvInterval);
-            clearInterval(luminosityInterval);
+            // clearInterval(luminosityInterval);
             clearInterval(sittingInterval);
         };
     }, []);
